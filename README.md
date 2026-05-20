@@ -1,50 +1,126 @@
-# Welcome to your Expo app 👋
+# Gestão Financeira — PDM
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo de controle financeiro pessoal desenvolvido com **Expo/React Native** (frontend) e **Express + Prisma + MySQL** (backend).
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Atividade_02_PDM/
+├── frontend/   → app React Native (Expo)
+├── backend/    → API REST (Node.js + Express + Prisma + MySQL)
+└── README.md   → este arquivo
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Pré-requisitos
 
-To learn more about developing your project with Expo, look at the following resources:
+- [Node.js LTS](https://nodejs.org)
+- MySQL Server instalado localmente (usuário `root`)
+- MySQL Workbench (ou DBeaver) para inspecionar o banco
+- Expo Go no celular **ou** emulador Android/iOS configurado
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 1. Iniciar o MySQL
 
-Join our community of developers creating universal apps.
+O serviço MySQL precisa estar rodando antes de qualquer coisa.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Windows — pelo terminal (como Administrador):**
+```powershell
+Start-Service MySQL80
+```
+
+**Windows — pela interface:**
+Pressione `Win + R` → digite `services.msc` → ache **MySQL80** → botão direito → **Iniciar**.
+
+Para verificar se está rodando:
+```powershell
+Get-Service MySQL80
+```
+O `Status` deve aparecer como `Running`.
+
+---
+
+## 2. Configurar o banco de dados
+
+Com o MySQL rodando, abra o **MySQL Workbench** e execute:
+
+```sql
+CREATE DATABASE gestao_financeira CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+---
+
+## 2. Subir o backend
+
+```bash
+cd backend
+npm install
+npx prisma migrate dev --name init
+npm run prisma:seed
+npm run dev
+```
+
+A API ficará disponível em `http://localhost:3000`.
+
+> Para inspecionar o banco visualmente: `npm run prisma:studio` (abre em `http://localhost:5555`)
+
+### Variáveis de ambiente (backend/.env)
+
+```env
+DATABASE_URL="mysql://root:SUA_SENHA@localhost:3306/gestao_financeira"
+PORT=3000
+```
+
+---
+
+## 3. Subir o frontend
+
+```bash
+cd frontend
+npm install
+npx expo start
+```
+
+Escaneie o QR Code com o **Expo Go** ou pressione `a` para abrir no emulador Android.
+
+### Variáveis de ambiente (frontend/.env)
+
+```env
+# Emulador Android (padrão)
+EXPO_PUBLIC_API_URL=http://10.0.2.2:3000
+
+# Device físico — descubra o IP da máquina com `ipconfig` e troque:
+# EXPO_PUBLIC_API_URL=http://192.168.x.x:3000
+
+# iOS Simulator ou Web:
+# EXPO_PUBLIC_API_URL=http://localhost:3000
+```
+
+> Sempre reinicie o `expo start` após alterar o `.env`.
+
+---
+
+## Endpoints da API
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/categories` | Lista categorias |
+| POST | `/categories` | Cria categoria |
+| PUT | `/categories/:id` | Atualiza categoria |
+| DELETE | `/categories/:id` | Remove categoria (bloqueia padrões) |
+| GET | `/transactions` | Lista transações (com categoria expandida) |
+| POST | `/transactions` | Cria transação |
+| PUT | `/transactions/:id` | Atualiza transação |
+| DELETE | `/transactions/:id` | Remove transação |
+
+---
+
+## Rodar tudo em paralelo (dois terminais)
+
+```bash
+# Terminal 1
+cd backend && npm run dev
+
+# Terminal 2
+cd frontend && npx expo start
+```
