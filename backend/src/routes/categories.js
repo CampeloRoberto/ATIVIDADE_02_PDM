@@ -29,10 +29,16 @@ router.put("/:id", async (req, res, next) => {
 
 router.delete("/:id", async (req, res, next) => {
   try {
-    const existing = await prisma.category.findUnique({ where: { id: req.params.id } });
+    const existing = await prisma.category.findUnique({
+      where: { id: req.params.id },
+      include: { _count: { select: { transactions: true } } },
+    });
     if (!existing) return res.status(404).json({ error: "Categoria não encontrada" });
     if (existing.isDefault) {
       return res.status(400).json({ error: "Categorias padrão não podem ser excluídas" });
+    }
+    if (existing._count.transactions > 0) {
+      return res.status(400).json({ error: `Esta categoria possui ${existing._count.transactions} transação(ões) vinculada(s) e não pode ser excluída` });
     }
     await prisma.category.delete({ where: { id: req.params.id } });
     res.status(204).send();

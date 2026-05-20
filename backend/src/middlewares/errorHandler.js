@@ -10,6 +10,9 @@ export function errorHandler(err, req, res, next) {
   if (err.code === "P2002") {
     return res.status(409).json({ error: "Registro duplicado" });
   }
+  if (err.code === "P2003") {
+    return res.status(400).json({ error: "Não é possível excluir: existem transações vinculadas a este registro" });
+  }
 
   res.status(500).json({ error: "Erro interno do servidor" });
 }

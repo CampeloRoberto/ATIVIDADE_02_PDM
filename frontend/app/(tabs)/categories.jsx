@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { MoneyContext } from "../../contexts/GlobalState";
 import CategoryItem from "../../components/CategoryItem";
 import Button from "../../components/Button";
@@ -19,7 +20,28 @@ const SUGGESTED_COLORS = [
   "#FFB6B6", "#B6FFB6", "#B6D4FF", "#FFE4B6", "#D4B6FF",
 ];
 
-const emptyForm = { name: "", displayName: "", icon: "", background: SUGGESTED_COLORS[0], isIncome: false };
+const PRESET_ICONS = [
+  "home", "work", "school", "restaurant", "favorite",
+  "flight", "pets", "savings", "movie", "coffee",
+  "shopping-cart", "fitness-center", "local-hospital", "directions-car", "music-note",
+  "sports-soccer", "computer", "phone", "beach-access", "fastfood",
+];
+
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "") || "cat";
+}
+
+const emptyForm = {
+  displayName: "",
+  icon: PRESET_ICONS[0],
+  background: SUGGESTED_COLORS[0],
+  isIncome: false,
+};
 
 export default function Categories() {
   const { categories, addCategory, removeCategory } = useContext(MoneyContext);
@@ -27,13 +49,14 @@ export default function Categories() {
   const [saving, setSaving] = useState(false);
 
   const handleCreate = async () => {
-    if (!form.name || !form.displayName || !form.icon) {
-      Alert.alert("Atenção", "Preencha nome, rótulo e ícone.");
+    if (!form.displayName.trim()) {
+      Alert.alert("Atenção", "Digite o nome da categoria.");
       return;
     }
     setSaving(true);
     try {
-      await addCategory(form);
+      const name = `${slugify(form.displayName)}_${Date.now().toString(36)}`;
+      await addCategory({ ...form, name, displayName: form.displayName.trim() });
       setForm(emptyForm);
     } catch (e) {
       Alert.alert("Erro", e.message ?? "Não foi possível criar a categoria.");
@@ -43,57 +66,74 @@ export default function Categories() {
   };
 
   const handleDelete = (cat) => {
-    Alert.alert("Excluir categoria", `Excluir "${cat.displayName}"?`, [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Excluir",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await removeCategory(cat.id);
-          } catch (e) {
-            Alert.alert("Erro", e.message ?? "Não foi possível excluir.");
-          }
+    Alert.alert(
+      "Excluir categoria",
+      `Deseja excluir a categoria "${cat.displayName}"?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await removeCategory(cat.id);
+            } catch (e) {
+              Alert.alert("Erro", e.message ?? "Não foi possível excluir.");
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
+
+  const hasPreview = form.displayName.trim().length > 0;
 
   return (
     <FlatList
       style={globalStyles.screenContainer}
       contentContainerStyle={[globalStyles.content, { paddingBottom: 40 }]}
       data={categories}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => String(item.id)}
       ListHeaderComponent={
         <View style={styles.form}>
           <Text style={styles.sectionTitle}>Nova categoria</Text>
 
-          <Text style={globalStyles.inputLabel}>Identificador (ex: health)</Text>
-          <TextInput
-            style={globalStyles.input}
-            value={form.name}
-            onChangeText={(v) => setForm({ ...form, name: v.toLowerCase().replace(/\s/g, "_") })}
-            placeholder="health"
-            autoCapitalize="none"
-          />
-
-          <Text style={globalStyles.inputLabel}>Rótulo exibido (ex: Saúde)</Text>
+          <Text style={globalStyles.inputLabel}>Nome</Text>
           <TextInput
             style={globalStyles.input}
             value={form.displayName}
             onChangeText={(v) => setForm({ ...form, displayName: v })}
-            placeholder="Saúde"
+            placeholder="Ex: Saúde, Academia, Streaming..."
           />
 
-          <Text style={globalStyles.inputLabel}>Ícone Material (ex: favorite)</Text>
-          <TextInput
-            style={globalStyles.input}
-            value={form.icon}
-            onChangeText={(v) => setForm({ ...form, icon: v })}
-            placeholder="favorite"
-            autoCapitalize="none"
-          />
+          {hasPreview && (
+            <View style={styles.preview}>
+              <View style={[styles.previewIcon, { backgroundColor: form.background }]}>
+                <MaterialIcons name={form.icon} size={22} color="#fff" />
+              </View>
+              <Text style={styles.previewName}>{form.displayName.trim()}</Text>
+              {form.isIncome && (
+                <Text style={[styles.badge, styles.badgeIncome]}>receita</Text>
+              )}
+            </View>
+          )}
+
+          <Text style={globalStyles.inputLabel}>Ícone</Text>
+          <View style={styles.iconGrid}>
+            {PRESET_ICONS.map((ic) => (
+              <TouchableOpacity
+                key={ic}
+                style={[
+                  styles.iconBtn,
+                  { backgroundColor: form.background },
+                  form.icon === ic && styles.iconBtnSelected,
+                ]}
+                onPress={() => setForm({ ...form, icon: ic })}
+              >
+                <MaterialIcons name={ic} size={22} color="#fff" />
+              </TouchableOpacity>
+            ))}
+          </View>
 
           <Text style={globalStyles.inputLabel}>Cor</Text>
           <View style={styles.colorPalette}>
@@ -159,6 +199,48 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.primaryText,
     marginBottom: 4,
+  },
+  preview: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "rgba(128,128,128,0.1)",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(128,128,128,0.25)",
+    marginBottom: 4,
+  },
+  previewIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  previewName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.primaryText,
+  },
+  iconGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  iconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.5,
+  },
+  iconBtnSelected: {
+    opacity: 1,
+    borderWidth: 2,
+    borderColor: colors.primaryText,
   },
   colorPalette: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   colorDot: {
