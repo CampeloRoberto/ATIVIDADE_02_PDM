@@ -1,4 +1,4 @@
-import { View, ScrollView, Alert, StyleSheet, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from "react-native";
+import { View, ScrollView, Alert, StyleSheet, KeyboardAvoidingView } from "react-native";
 import { globalStyles } from "../../styles/globalStyles";
 import Button from "../../components/Button";
 import { useContext, useRef, useState } from "react";
@@ -8,12 +8,13 @@ import DatePicker from "../../components/DatePicker";
 import CategoryPicker from "../../components/CategoryPicker";
 import { MoneyContext } from "../../contexts/GlobalState";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { categories } from "../../constants/categories";
 
 const initialForm = {
   description: "",
   value: 0,
   date: new Date(),
-  category: "Renda",
+  category: categories.income.name,
 };
 
 export default function AddTransactions() {
@@ -43,17 +44,15 @@ export default function AddTransactions() {
 
   return (
     <KeyboardAvoidingView style={globalStyles.screenContainer}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView style={globalStyles.content}>
-          <View style={styles.form}>
-            <DescriptionInput form={form} setForm={setForm} valueInputRef={valueInputRef} />
-            <CurrencyInput form={form} setForm={setForm} valueInputRef={valueInputRef} />
-            <DatePicker form={form} setForm={setForm} />
-            <CategoryPicker form={form} setForm={setForm} />
-          </View>
-          <Button onPress={addTransaction}>Adicionar</Button>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+      <ScrollView style={globalStyles.content}>
+        <View style={styles.form}>
+          <DescriptionInput form={form} setForm={setForm} valueInputRef={valueInputRef} />
+          <CurrencyInput form={form} setForm={setForm} valueInputRef={valueInputRef} />
+          <DatePicker form={form} setForm={setForm} />
+          <CategoryPicker form={form} setForm={setForm} />
+        </View>
+        <Button onPress={addTransaction}>Adicionar</Button>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

@@ -3,7 +3,8 @@ import { MoneyContext } from "../../contexts/GlobalState";
 import { categories } from "../../constants/categories";
 import { globalStyles } from "../../styles/globalStyles";
 import SummaryItem from "../../components/SummaryItem";
-import { StyleSheet, Text, View } from "react-native";
+import CategoryPieChart from "../../components/CategoryPieChart";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors } from "../../constants/colors";
 
 const SUMMARY_CATEGORY_KEYS = [
@@ -49,47 +50,62 @@ export default function Summary() {
   const valueStyle =
     totals.sum > 0 ? globalStyles.positiveText : globalStyles.negativeText;
 
+  const pieData = [
+    { color: colors.categoryIncome, value: totals[categories.income.name] },
+    { color: colors.categoryFood, value: totals[categories.food.name] },
+    { color: colors.categoryHouse, value: totals[categories.house.name] },
+    { color: colors.categoryEducation, value: totals[categories.education.name] },
+    { color: colors.categoryTravel, value: totals[categories.travel.name] },
+  ];
+
   return (
     <View style={globalStyles.screenContainer}>
-      <View style={globalStyles.content}>
-        <SummaryItem
-          category={categories.income.name}
-          value={totals[categories.income.name]}
-        />
-        <SummaryItem
-          category={categories.food.name}
-          value={totals[categories.food.name]}
-        />
-        <SummaryItem
-          category={categories.house.name}
-          value={totals[categories.house.name]}
-        />
-        <SummaryItem
-          category={categories.education.name}
-          value={totals[categories.education.name]}
-        />
-        <SummaryItem
-          category={categories.travel.name}
-          value={totals[categories.travel.name]}
-        />
+      <ScrollView contentContainerStyle={globalStyles.content}>
+        <CategoryPieChart data={pieData} />
+        <View style={styles.itemList}>
+          <SummaryItem
+            category={categories.income.name}
+            value={totals[categories.income.name]}
+          />
+          <SummaryItem
+            category={categories.food.name}
+            value={totals[categories.food.name]}
+          />
+          <SummaryItem
+            category={categories.house.name}
+            value={totals[categories.house.name]}
+          />
+          <SummaryItem
+            category={categories.education.name}
+            value={totals[categories.education.name]}
+          />
+          <SummaryItem
+            category={categories.travel.name}
+            value={totals[categories.travel.name]}
+          />
 
-        <View style={globalStyles.line} />
+          <View style={globalStyles.line} />
 
-        <View style={styles.balance}>
-          <Text style={styles.balanceText}>Saldo</Text>
-          <Text style={valueStyle}>
-            {totals.sum.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-          </Text>
+          <View style={styles.balance}>
+            <Text style={styles.balanceText}>Saldo</Text>
+            <Text style={valueStyle}>
+              {totals.sum.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+            </Text>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  itemList: {
+    marginTop: 16,
+    gap: 4,
+  },
   balance: {
     display: "flex",
     flexDirection: "row",
