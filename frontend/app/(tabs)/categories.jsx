@@ -97,12 +97,15 @@ export default function Categories() {
             <Text style={styles.sectionTitle}>Nova categoria</Text>
 
             <Text style={globalStyles.inputLabel}>Nome</Text>
-            <TextInput
-              style={globalStyles.input}
-              value={form.displayName}
-              onChangeText={(v) => setForm({ ...form, displayName: v })}
-              placeholder="Ex: Saúde, Academia, Streaming..."
-            />
+            <View style={styles.blurInput}>
+              <TextInput
+                style={styles.blurInputText}
+                value={form.displayName}
+                onChangeText={(v) => setForm({ ...form, displayName: v })}
+                placeholder="Ex: Saúde, Academia, Streaming..."
+                placeholderTextColor="rgba(100,100,100,0.45)"
+              />
+            </View>
 
             {hasPreview && (
               <View style={styles.preview}>
@@ -239,6 +242,25 @@ function showAlert(title, msg) {
 }
 
 const styles = StyleSheet.create({
+  blurInput: {
+    height: 44,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(180,180,180,0.5)",
+    backgroundColor: "rgba(255,255,255,0.55)",
+    overflow: "hidden",
+    // web only — real backdrop blur
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+  },
+  blurInputText: {
+    flex: 1,
+    height: "100%",
+    paddingHorizontal: 14,
+    fontSize: 15,
+    color: "#555",
+  },
   form: { gap: 8, marginBottom: 12 },
   sectionTitle: {
     fontSize: 18,

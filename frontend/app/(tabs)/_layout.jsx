@@ -2,14 +2,22 @@ import { Tabs } from "expo-router";
 import { colors } from "../../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function TabsLayout() {
+  const { logout } = useAuth();
+
   return (
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
         headerTintColor: colors.primaryContrast,
         headerTitleAlign: "center",
+        headerRight: () => (
+          <TouchableOpacity onPress={logout} style={{ marginRight: 16 }}>
+            <MaterialIcons name="logout" size={22} color={colors.primaryContrast} />
+          </TouchableOpacity>
+        ),
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.inactive,
         tabBarStyle: {

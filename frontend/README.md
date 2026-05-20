@@ -1,4 +1,13 @@
-# Welcome to your Expo app 👋
+# Atividade 02 - PDM
+
+## Credenciais de acesso
+
+| Campo | Valor |
+|-------|-------|
+| E-mail | `admin@gmail.com` |
+| Senha | `password` |
+
+---
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
