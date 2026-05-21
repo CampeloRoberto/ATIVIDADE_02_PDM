@@ -1,12 +1,18 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { createCategorySchema, updateCategorySchema } from "../schemas/categorySchema.js";
+import { authenticate } from "../middlewares/authenticate.js";
 
 const router = Router();
 
+router.use(authenticate);
+
 router.get("/", async (req, res, next) => {
   try {
-    const categories = await prisma.category.findMany({ orderBy: { displayName: "asc" } });
+    const categories = await prisma.category.findMany({
+      where: { OR: [{ isDefault: true }, { userId: req.user.id }] },
+      orderBy: { displayName: "asc" },
+    });
     res.json(categories);
   } catch (e) { next(e); }
 });
@@ -14,7 +20,9 @@ router.get("/", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
   try {
     const data = createCategorySchema.parse(req.body);
-    const category = await prisma.category.create({ data });
+    const category = await prisma.category.create({
+      data: { ...data, userId: req.user.id },
+    });
     res.status(201).json(category);
   } catch (e) { next(e); }
 });
@@ -36,6 +44,9 @@ router.delete("/:id", async (req, res, next) => {
     if (!existing) return res.status(404).json({ error: "Categoria não encontrada" });
     if (existing.isDefault) {
       return res.status(400).json({ error: "Categorias padrão não podem ser excluídas" });
+    }
+    if (existing.userId !== req.user.id) {
+      return res.status(403).json({ error: "Sem permissão para excluir esta categoria" });
     }
     if (existing._count.transactions > 0) {
       return res.status(400).json({ error: `Esta categoria possui ${existing._count.transactions} transação(ões) vinculada(s) e não pode ser excluída` });

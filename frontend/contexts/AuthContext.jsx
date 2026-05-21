@@ -1,9 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { api } from "../services/api";
 
-const VALID_EMAIL = "admin@gmail.com";
-const VALID_PASSWORD = "password";
-const AUTH_KEY = "@pdm_auth";
+const TOKEN_KEY = "@pdm_token";
+const USER_KEY  = "@pdm_user";
 
 export const AuthContext = createContext();
 
@@ -12,34 +12,43 @@ export function useAuth() {
 }
 
 export default function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken]               = useState(null);
+  const [user, setUser]                 = useState(null);
+  const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem(AUTH_KEY).then((val) => {
-      setIsAuthenticated(val === "true");
+    Promise.all([
+      AsyncStorage.getItem(TOKEN_KEY),
+      AsyncStorage.getItem(USER_KEY),
+    ]).then(([t, u]) => {
+      if (t) setToken(t);
+      if (u) setUser(JSON.parse(u));
       setLoading(false);
     });
   }, []);
 
   const login = useCallback(async (email, password) => {
-    if (
-      email.trim().toLowerCase() !== VALID_EMAIL ||
-      password !== VALID_PASSWORD
-    ) {
-      throw new Error("E-mail ou senha incorretos.");
-    }
-    await AsyncStorage.setItem(AUTH_KEY, "true");
-    setIsAuthenticated(true);
+    const res = await api.login({ email: email.trim().toLowerCase(), password });
+    await AsyncStorage.multiSet([[TOKEN_KEY, res.token], [USER_KEY, JSON.stringify(res.user)]]);
+    setToken(res.token);
+    setUser(res.user);
+  }, []);
+
+  const register = useCallback(async (name, email, password) => {
+    const res = await api.register({ name: name.trim(), email: email.trim().toLowerCase(), password });
+    await AsyncStorage.multiSet([[TOKEN_KEY, res.token], [USER_KEY, JSON.stringify(res.user)]]);
+    setToken(res.token);
+    setUser(res.user);
   }, []);
 
   const logout = useCallback(async () => {
-    await AsyncStorage.removeItem(AUTH_KEY);
-    setIsAuthenticated(false);
+    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+    setToken(null);
+    setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider value={{ token, user, isAuthenticated: !!token, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
