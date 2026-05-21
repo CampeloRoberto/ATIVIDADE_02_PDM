@@ -41,6 +41,7 @@ export default function GlobalState({ children }) {
   const addTransaction = useCallback(async (data) => {
     const tx = await api.createTransaction(data, token);
     setTransactions((prev) => [tx, ...prev]);
+    return tx;
   }, [token]);
 
   const removeTransaction = useCallback(async (id) => {
@@ -53,6 +54,7 @@ export default function GlobalState({ children }) {
     setCategories((prev) =>
       [...prev, cat].sort((a, b) => a.displayName.localeCompare(b.displayName))
     );
+    return cat;
   }, [token]);
 
   const removeCategory = useCallback(async (id) => {
