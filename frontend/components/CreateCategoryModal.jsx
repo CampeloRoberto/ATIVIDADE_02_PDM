@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { Modal, View, Text, TextInput, Pressable, ScrollView, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../contexts/ThemeContext";
 
 const ICONS_EXPENSE = [
@@ -32,6 +33,7 @@ function slugify(text) {
 
 export default function CreateCategoryModal({ visible, onClose, onCreate, lockedIsIncome, busy }) {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState("");
   const [isIncome, setIsIncome] = useState(lockedIsIncome ?? false);
   const iconOpts = isIncome ? ICONS_INCOME : ICONS_EXPENSE;
@@ -69,7 +71,7 @@ export default function CreateCategoryModal({ visible, onClose, onCreate, locked
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={[styles.overlay, { backgroundColor: theme.overlay }]}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, { backgroundColor: theme.bg }]}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, { backgroundColor: theme.bg, paddingBottom: Math.max(34, insets.bottom + 16) }]}>
           <View style={[styles.grabber, { backgroundColor: theme.divider }]} />
           <View style={styles.headerRow}>
             <Text style={[styles.title, { color: theme.text }]}>Nova categoria</Text>

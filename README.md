@@ -95,9 +95,19 @@ npx expo start
 
 Escaneie o QR Code com o **Expo Go** ou pressione `a` para abrir no emulador Android.
 
-
-
 > Sempre reinicie o `expo start` após alterar o `.env`.
+
+### Abrindo no navegador (`w`)
+
+Ao pressionar `w` o app abre no Chrome. Se ele **pular a tela de login** e entrar direto em uma conta, é porque o browser salvou um token de sessão anterior no `localStorage`. Para limpar:
+
+1. Abra o **DevTools** (`F12`) → aba **Application**
+2. No painel esquerdo, expanda **Local storage** e clique na URL do app (ex: `http://localhost:8081`)
+3. Apague as linhas `@pdm_token` e `@pdm_user` (selecione cada uma e pressione **Delete**)
+
+**Ou mais rápido:** ainda na aba Application, clique em **Storage** (no painel esquerdo) → botão **"Clear site data"** — isso limpa tudo de uma vez.
+
+Após limpar, recarregue a página e a tela de login aparecerá normalmente.
 
 ---
 

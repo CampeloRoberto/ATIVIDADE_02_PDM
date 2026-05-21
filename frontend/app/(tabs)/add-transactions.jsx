@@ -107,7 +107,7 @@ export default function AddTransactions() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 22, paddingBottom: 130 + insets.bottom }}
+        contentContainerStyle={{ padding: 22, paddingBottom: 160 + insets.bottom }}
         showsVerticalScrollIndicator={false}>
         {step === 0 && <Step1Value form={form} setForm={setForm} theme={theme} />}
         {step === 1 && <Step2Category form={form} setForm={setForm} theme={theme} categories={categories} onAdd={() => setCreatingCat(true)} />}
@@ -121,7 +121,7 @@ export default function AddTransactions() {
           style={[styles.bottomBtn, {
             backgroundColor: canNext ? theme.primary : theme.divider,
             shadowColor: theme.primary,
-            bottom: 30 + insets.bottom,
+            bottom: 88 + insets.bottom,
           }]}>
           <Text style={{ color: canNext ? "#fff" : theme.textDim, fontWeight: "700", fontSize: 16 }}>
             {saving ? "Salvando..." : step === 2 ? "Adicionar" : "Próximo"}
