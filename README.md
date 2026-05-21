@@ -115,6 +115,29 @@ EXPO_PUBLIC_API_URL=http://10.0.2.2:3000
 
 ---
 
+## Usuário de teste (pré-cadastrado pelo seed)
+
+Ao rodar `npm run prisma:seed` um usuário de teste é criado automaticamente com transações distribuídas ao longo de 2026:
+
+| Campo | Valor |
+|-------|-------|
+| **E-mail** | `test@gmail.com` |
+| **Senha** | `teste` |
+
+### Saldos por mês (2026)
+
+| Mês | Resultado |
+|-----|-----------|
+| Janeiro | ✅ Positivo (+R$ 1.650,00) |
+| Fevereiro | ✅ Positivo (+R$ 2.100,00) |
+| Março | ❌ Negativo (−R$ 1.600,00) |
+| Abril | ✅ Positivo (+R$ 1.550,00) |
+| Maio | ❌ Negativo (−R$ 500,00) |
+
+> O seed é seguro para rodar mais de uma vez — ele ignora o usuário se já existir.
+
+---
+
 ## Rodar tudo em paralelo (dois terminais)
 
 ```bash
