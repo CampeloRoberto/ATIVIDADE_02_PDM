@@ -63,7 +63,8 @@ export default function Login() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: theme.bg }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -122,12 +123,6 @@ export default function Login() {
               <MaterialIcons name="info-outline" size={16} color={theme.red} />
               <Text style={{ color: theme.red, fontSize: 13, fontWeight: "500", flex: 1 }}>{error}</Text>
             </View>
-          )}
-
-          {!isRegister && (
-            <Pressable style={{ alignSelf: "flex-end" }}>
-              <Text style={{ color: theme.primary, fontSize: 13, fontWeight: "600" }}>Esqueci a senha</Text>
-            </Pressable>
           )}
 
           <Pressable
