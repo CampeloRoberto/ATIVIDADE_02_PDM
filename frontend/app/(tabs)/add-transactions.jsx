@@ -107,7 +107,7 @@ export default function AddTransactions() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 22, paddingBottom: 160 + insets.bottom }}
+        contentContainerStyle={{ padding: 22, paddingBottom: 16 }}
         showsVerticalScrollIndicator={false}>
         {step === 0 && <Step1Value form={form} setForm={setForm} theme={theme} />}
         {step === 1 && <Step2Category form={form} setForm={setForm} theme={theme} categories={categories} onAdd={() => setCreatingCat(true)} />}
@@ -115,19 +115,20 @@ export default function AddTransactions() {
       </ScrollView>
 
       {!creatingCat && (
-        <Pressable
-          onPress={step === 2 ? submit : next}
-          disabled={!canNext || saving}
-          style={[styles.bottomBtn, {
-            backgroundColor: canNext ? theme.primary : theme.divider,
-            shadowColor: theme.primary,
-            bottom: 88 + insets.bottom,
-          }]}>
-          <Text style={{ color: canNext ? "#fff" : theme.textDim, fontWeight: "700", fontSize: 16 }}>
-            {saving ? "Salvando..." : step === 2 ? "Adicionar" : "Próximo"}
-          </Text>
-          <MaterialIcons name={step === 2 ? "check" : "arrow-forward"} size={20} color={canNext ? "#fff" : theme.textDim} />
-        </Pressable>
+        <View style={{ paddingHorizontal: 22, paddingTop: 12, paddingBottom: 88 + insets.bottom, backgroundColor: theme.bg }}>
+          <Pressable
+            onPress={step === 2 ? submit : next}
+            disabled={!canNext || saving}
+            style={[styles.bottomBtn, {
+              backgroundColor: canNext ? theme.primary : theme.divider,
+              shadowColor: theme.primary,
+            }]}>
+            <Text style={{ color: canNext ? "#fff" : theme.textDim, fontWeight: "700", fontSize: 16 }}>
+              {saving ? "Salvando..." : step === 2 ? "Adicionar" : "Próximo"}
+            </Text>
+            <MaterialIcons name={step === 2 ? "check" : "arrow-forward"} size={20} color={canNext ? "#fff" : theme.textDim} />
+          </Pressable>
+        </View>
       )}
 
       <CreateCategoryModal
@@ -344,7 +345,6 @@ const s3 = StyleSheet.create({
 
 const styles = StyleSheet.create({
   bottomBtn: {
-    position: "absolute", left: 22, right: 22,
     height: 54, borderRadius: 16,
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
     shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 6,

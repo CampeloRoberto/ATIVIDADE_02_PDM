@@ -1,7 +1,7 @@
 // frontend/app/(tabs)/settings.jsx
 // Configurações: perfil + tema (claro/escuro) + paleta + preferências.
 
-import { View, Text, Pressable, ScrollView, StyleSheet, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, Alert, Platform } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
@@ -15,10 +15,23 @@ export default function Settings() {
   const insets = useSafeAreaInsets();
 
   const handleLogout = () => {
-    Alert.alert("Sair", "Deseja sair da conta?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Sair", style: "destructive", onPress: () => logout() },
-    ]);
+    if (Platform.OS === "web") {
+      if (window.confirm("Deseja sair da conta?")) logout();
+    } else {
+      Alert.alert("Sair", "Deseja sair da conta?", [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Sair", style: "destructive", onPress: logout },
+      ]);
+    }
+  };
+
+  const handleAbout = () => {
+    const msg = "Versão 1.0.0\nAtividade 02 — PDM\nGerenciador financeiro pessoal";
+    if (Platform.OS === "web") {
+      window.alert(`Sobre o app\n\n${msg}`);
+    } else {
+      Alert.alert("Sobre o app", msg);
+    }
   };
 
   const firstName = (user?.name || "Usuário").split(" ")[0];
@@ -117,7 +130,7 @@ export default function Settings() {
         {/* Preferências */}
         <SectionTitle theme={theme}>Preferências</SectionTitle>
         <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.divider, shadowColor: theme.shadowColor }]}>
-          <Row theme={theme} icon="payments" iconColor={theme.yellow} label="Moeda" value="BRL — Real Brasileiro" />
+          <Row theme={theme} icon="payments" iconColor={theme.yellow} label="Moeda" value="BRL — Real Brasileiro" comingSoon />
           <Row theme={theme} icon="notifications" iconColor={theme.blue} label="Notificações" comingSoon />
           <Row theme={theme} icon="share" iconColor={theme.primary} label="Exportar dados" comingSoon last />
         </View>
@@ -125,7 +138,7 @@ export default function Settings() {
         {/* Conta */}
         <SectionTitle theme={theme}>Conta</SectionTitle>
         <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.divider, shadowColor: theme.shadowColor }]}>
-          <Row theme={theme} icon="info" iconColor={theme.textMuted} label="Sobre o app" value="v1.0" />
+          <Row theme={theme} icon="info" iconColor={theme.textMuted} label="Sobre o app" value="v1.0.0" onPress={handleAbout} />
           <Row theme={theme} icon="logout" iconColor={theme.red} label="Sair" danger onPress={handleLogout} last />
         </View>
       </ScrollView>
@@ -161,9 +174,9 @@ function Row({ theme, icon, iconColor, label, value, onPress, comingSoon, danger
       disabled={comingSoon}
       style={[styles.row, !last && { borderBottomWidth: 1, borderBottomColor: theme.divider }, comingSoon && { opacity: 0.6 }]}>
       <IconBg color={iconColor} icon={icon} />
-      <View style={{ flex: 1, marginHorizontal: 12 }}>
+      <View style={{ flex: 1, flexShrink: 1, marginHorizontal: 12 }}>
         <Text style={{ color: danger ? theme.red : theme.text, fontWeight: "600", fontSize: 14 }}>{label}</Text>
-        {value && <Text style={{ color: theme.textDim, fontSize: 11, marginTop: 1 }}>{value}</Text>}
+        {value && !comingSoon && <Text numberOfLines={1} style={{ color: theme.textDim, fontSize: 11, marginTop: 1 }}>{value}</Text>}
       </View>
       {comingSoon ? (
         <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: theme.surfaceAlt }}>
