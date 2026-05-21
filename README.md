@@ -64,7 +64,7 @@ A API ficará disponível em `http://localhost:3000`.
 
 > Para inspecionar o banco visualmente: `npm run prisma:studio` (abre em `http://localhost:5555`)
 
-### Variáveis de ambiente (backend/.env)
+### Variáveis de ambiente (backend/.env)(uso do professor - senha que vc configurou para seu MYsql)
 
 ```env
 DATABASE_URL="mysql://root:SUA_SENHA@localhost:3306/gestao_financeira"
@@ -72,18 +72,7 @@ PORT=3000
 ```
 
 ---
-
-## 3. Subir o frontend
-
-```bash
-cd frontend
-npm install
-npx expo start
-```
-
-Escaneie o QR Code com o **Expo Go** ou pressione `a` para abrir no emulador Android.
-
-### Variáveis de ambiente (frontend/.env)
+### Variáveis de ambiente (se mudar de rede, vc deve fazer este passo!)(frontend/.env)
 
 ```env
 # Emulador Android (padrão)
@@ -95,6 +84,18 @@ EXPO_PUBLIC_API_URL=http://10.0.2.2:3000
 # iOS Simulator ou Web:
 # EXPO_PUBLIC_API_URL=http://localhost:3000
 ```
+
+## 3. Subir o frontend
+
+```bash
+cd frontend
+npm install
+npx expo start
+```
+
+Escaneie o QR Code com o **Expo Go** ou pressione `a` para abrir no emulador Android.
+
+
 
 > Sempre reinicie o `expo start` após alterar o `.env`.
 
