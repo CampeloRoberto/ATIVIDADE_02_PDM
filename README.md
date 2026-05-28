@@ -1,50 +1,160 @@
-# Welcome to your Expo app 👋
+# Gestão Financeira — PDM
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo de controle financeiro pessoal desenvolvido com **Expo/React Native** (frontend) e **Express + Prisma + MySQL** (backend).
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+Atividade_02_PDM/
+├── frontend/   → app React Native (Expo)
+├── backend/    → API REST (Node.js + Express + Prisma + MySQL)
+└── README.md   → este arquivo
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Pré-requisitos
 
-To learn more about developing your project with Expo, look at the following resources:
+- [Node.js LTS](https://nodejs.org)
+- MySQL Server instalado localmente (usuário `root`)
+- MySQL Workbench (ou DBeaver) para inspecionar o banco
+- Expo Go no celular **ou** emulador Android/iOS configurado
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 1. Iniciar o MySQL
 
-Join our community of developers creating universal apps.
+O serviço MySQL precisa estar rodando antes de qualquer coisa.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Windows — pelo terminal (como Administrador):**
+```powershell
+Start-Service MySQL80
+```
+
+**Windows — pela interface:**
+Pressione `Win + R` → digite `services.msc` → ache **MySQL80** → botão direito → **Iniciar**.
+
+Para verificar se está rodando:
+```powershell
+Get-Service MySQL80
+```
+O `Status` deve aparecer como `Running`.
+
+---
+
+## 2. Configurar o banco de dados
+
+Com o MySQL rodando, abra o **MySQL Workbench** e execute:
+
+```sql
+CREATE DATABASE gestao_financeira CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+---
+
+## 2. Subir o backend
+
+```bash
+cd backend
+npm install
+npx prisma migrate dev --name init
+npm run prisma:seed
+npm run dev
+```
+
+A API ficará disponível em `http://localhost:3000`.
+
+> Para inspecionar o banco visualmente: `npm run prisma:studio` (abre em `http://localhost:5555`)
+
+### Variáveis de ambiente (backend/.env)(uso do professor - senha que vc configurou para seu MYsql)
+
+```env
+DATABASE_URL="mysql://root:SUA_SENHA@localhost:3306/gestao_financeira"
+PORT=3000
+```
+
+---
+### Variáveis de ambiente (se mudar de rede, vc deve fazer este passo!)(frontend/.env)
+
+```env
+# Emulador Android (padrão)
+EXPO_PUBLIC_API_URL=http://10.0.2.2:3000
+
+# Device físico — descubra o IP da máquina com `ipconfig` e troque:
+# EXPO_PUBLIC_API_URL=http://192.168.x.x:3000
+
+# iOS Simulator ou Web:
+# EXPO_PUBLIC_API_URL=http://localhost:3000
+```
+
+## 3. Subir o frontend
+
+```bash
+cd frontend
+npm install
+npx expo start
+```
+
+Escaneie o QR Code com o **Expo Go** ou pressione `a` para abrir no emulador Android.
+
+> Sempre reinicie o `expo start` após alterar o `.env`.
+
+### Abrindo no navegador (`w`)
+
+Ao pressionar `w` o app abre no Chrome. Se ele **pular a tela de login** e entrar direto em uma conta, é porque o browser salvou um token de sessão anterior no `localStorage`. Para limpar:
+
+1. Abra o **DevTools** (`F12`) → aba **Application**
+2. No painel esquerdo, expanda **Local storage** e clique na URL do app (ex: `http://localhost:8081`)
+3. Apague as linhas `@pdm_token` e `@pdm_user` (selecione cada uma e pressione **Delete**)
+
+**Ou mais rápido:** ainda na aba Application, clique em **Storage** (no painel esquerdo) → botão **"Clear site data"** — isso limpa tudo de uma vez.
+
+Após limpar, recarregue a página e a tela de login aparecerá normalmente.
+
+---
+
+## Endpoints da API
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/categories` | Lista categorias |
+| POST | `/categories` | Cria categoria |
+| PUT | `/categories/:id` | Atualiza categoria |
+| DELETE | `/categories/:id` | Remove categoria (bloqueia padrões) |
+| GET | `/transactions` | Lista transações (com categoria expandida) |
+| POST | `/transactions` | Cria transação |
+| PUT | `/transactions/:id` | Atualiza transação |
+| DELETE | `/transactions/:id` | Remove transação |
+
+---
+
+## Usuário de teste (pré-cadastrado pelo seed)
+
+Ao rodar `npm run prisma:seed` um usuário de teste é criado automaticamente com transações distribuídas ao longo de 2026:
+
+| Campo | Valor |
+|-------|-------|
+| **E-mail** | `test@gmail.com` |
+| **Senha** | `teste` |
+
+### Saldos por mês (2026)
+
+| Mês | Resultado |
+|-----|-----------|
+| Janeiro | ✅ Positivo (+R$ 1.650,00) |
+| Fevereiro | ✅ Positivo (+R$ 2.100,00) |
+| Março | ❌ Negativo (−R$ 1.600,00) |
+| Abril | ✅ Positivo (+R$ 1.550,00) |
+| Maio | ❌ Negativo (−R$ 500,00) |
+
+> O seed é seguro para rodar mais de uma vez — ele ignora o usuário se já existir.
+
+---
+
+## Rodar tudo em paralelo (dois terminais)
+
+```bash
+# Terminal 1
+cd backend && npm run dev
+
+# Terminal 2
+cd frontend && npx expo start
+```
