@@ -1,0 +1,331 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Gestão Financeira API",
+    "description": "Collection para testar a API de gestão financeira.\nExecute os requests na ordem numérica — o Login salva o token automaticamente nas demais requisições.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Preenchido automaticamente após o Login"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string",
+      "description": "Preenchido automaticamente após Criar categoria"
+    },
+    {
+      "key": "defaultCategoryId",
+      "value": "",
+      "type": "string",
+      "description": "Preenchido automaticamente após Listar categorias (id da categoria income)"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string",
+      "description": "Preenchido automaticamente após Criar transação"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "item": [
+        {
+          "name": "GET / — Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Verifica se a API está no ar.\nResposta esperada: { \"ok\": true, \"name\": \"gestao-financeira-api\" }"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Auth",
+      "item": [
+        {
+          "name": "POST /auth/login — Login (salva token automaticamente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('Token salvo com sucesso:', json.token.substring(0, 30) + '...');",
+                  "} else {",
+                  "    console.error('Login falhou — token não encontrado na resposta');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@gmail.com\",\n  \"password\": \"teste\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Autentica com o usuário de teste criado pelo seed.\nO script de Test salva o JWT em {{token}} automaticamente."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Categories",
+      "item": [
+        {
+          "name": "GET /categories — Listar categorias (salva id da income)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (Array.isArray(json)) {",
+                  "    var income = json.find(function(c) { return c.name === 'income'; });",
+                  "    if (income) {",
+                  "        pm.collectionVariables.set('defaultCategoryId', income.id);",
+                  "        console.log('ID da categoria income salvo:', income.id);",
+                  "    } else {",
+                  "        console.warn('Categoria income não encontrada — rode o seed novamente');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            },
+            "description": "Lista todas as categorias (5 padrão + as do usuário).\nO script de Test captura o id da categoria 'income' e salva em {{defaultCategoryId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /categories — Criar categoria (salva id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) {",
+                  "    pm.collectionVariables.set('categoryId', json.id);",
+                  "    console.log('ID da nova categoria salvo:', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"health\",\n  \"displayName\": \"Saúde\",\n  \"icon\": \"favorite\",\n  \"background\": \"#FFB6B6\",\n  \"isIncome\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            },
+            "description": "Cria uma nova categoria personalizada.\nResposta esperada: 201 Created com o objeto criado.\nO id gerado é salvo automaticamente em {{categoryId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /categories/:id — Atualizar categoria",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Saúde e Bem-estar\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Atualiza o displayName da categoria criada no passo anterior.\nUsa {{categoryId}} salvo automaticamente."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /categories/:id — Excluir categoria criada (espera 204)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Remove a categoria personalizada criada.\nResposta esperada: 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /categories/:id — Excluir categoria padrão (espera 400)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{defaultCategoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{defaultCategoryId}}"]
+            },
+            "description": "Tenta excluir a categoria padrão 'income'.\nResposta esperada: 400 Bad Request com { \"error\": \"Categorias padrão não podem ser excluídas\" }."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Transactions",
+      "item": [
+        {
+          "name": "POST /transactions — Criar transação (salva id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) {",
+                  "    pm.collectionVariables.set('transactionId', json.id);",
+                  "    console.log('ID da transação salvo:', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Salário de outubro\",\n  \"value\": 3500.50,\n  \"date\": \"2026-04-29\",\n  \"categoryId\": \"{{defaultCategoryId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"]
+            },
+            "description": "Cria uma transação usando a categoria income ({{defaultCategoryId}}).\nResposta esperada: 201 Created com o objeto já incluindo a category aninhada.\nO id é salvo automaticamente em {{transactionId}}."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /transactions — Listar transações",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"]
+            },
+            "description": "Lista todas as transações do usuário com a category expandida, ordenadas por data."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /transactions/:id — Excluir transação (espera 204)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions", "{{transactionId}}"]
+            },
+            "description": "Remove a transação criada no passo anterior.\nResposta esperada: 204 No Content."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /transactions — Validar erros Zod (espera 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"]
+            },
+            "description": "Envia um body inválido para testar a validação do Zod.\nResposta esperada: 400 Bad Request com { \"error\": \"Dados inválidos\", \"details\": [...] }."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

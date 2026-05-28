@@ -111,6 +111,41 @@ Após limpar, recarregue a página e a tela de login aparecerá normalmente.
 
 ---
 
+## Testando a API com o Postman
+
+A pasta `postman/` contém uma collection pronta para importar no Postman com todos os endpoints configurados e autenticação automática.
+
+### Como importar
+
+1. Abra o Postman
+2. Clique em **Import** (canto superior esquerdo)
+3. Selecione o arquivo `postman/collection.json`
+4. A collection **"Gestão Financeira API"** aparecerá no painel esquerdo
+
+### Como usar
+
+Execute os requests **na ordem numérica das pastas**:
+
+| Ordem | Pasta / Request | O que acontece |
+|-------|----------------|----------------|
+| 1 | Health Check | Confirma que a API está no ar |
+| 2 | Auth → Login | Salva o `{{token}}` automaticamente |
+| 3.1 | Categories → Listar | Salva o `{{defaultCategoryId}}` da categoria *income* |
+| 3.2 | Categories → Criar | Salva o `{{categoryId}}` da nova categoria |
+| 3.3 | Categories → Atualizar | Usa `{{categoryId}}` salvo |
+| 3.4 | Categories → Excluir criada | Espera `204 No Content` |
+| 3.5 | Categories → Excluir padrão | Espera `400` — categorias padrão são protegidas |
+| 4.1 | Transactions → Criar | Usa `{{defaultCategoryId}}`; salva `{{transactionId}}` |
+| 4.2 | Transactions → Listar | Retorna transações com category expandida |
+| 4.3 | Transactions → Excluir | Espera `204 No Content` |
+| 4.4 | Transactions → Validar erros | Espera `400` com `details` do Zod |
+
+> As variáveis `{{token}}`, `{{categoryId}}`, `{{defaultCategoryId}}` e `{{transactionId}}` são preenchidas automaticamente pelos scripts de **Test** de cada request — não é necessário copiar e colar IDs manualmente.
+
+> A variável `{{baseUrl}}` está definida como `http://localhost:3000` na própria collection. Para alterar, clique nos três pontos da collection → **Edit** → aba **Variables**.
+
+---
+
 ## Endpoints da API
 
 | Método | Rota | Descrição |
